@@ -1,0 +1,32 @@
+{
+   "name": "device-info-api",
+   "version": "1.0.0",
+   "description": "API thu thập thông tin thiết bị và trình duyệt",
+   "main": "index.js",
+   "scripts": {
+      "start": "node index.js",
+      "dev": "nodemon index.js",
+      "test": "echo \"Error: no test specified\" && exit 1"
+   },
+   "keywords": [
+      "device",
+      "info",
+      "api",
+      "express",
+      "fingerprint"
+   ],
+   "author": "",
+   "license": "ISC",
+   "dependencies": {
+      "cors": "^2.8.5",
+      "express": "^4.18.2",
+      "jsdom": "^22.1.0"
+   },
+   "devDependencies": {
+      "nodemon": "^3.0.1"
+   },
+   "engines": {
+      "node": ">=14.0.0"
+   },
+   "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
+}

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thu thập thông tin thiết bị</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .info-display {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            background-color: #f5f5f5;
+            overflow-x: auto;
+        }
+        .info-item {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #ddd;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #34495e;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #eee;
+            border: none;
+            margin-right: 5px;
+        }
+        .tab.active {
+            background-color: #3498db;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Thu thập thông tin thiết bị</h1>
+        <p>Công cụ này sẽ thu thập và hiển thị thông tin về thiết bị và trình duyệt của bạn.</p>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('tab-direct')">Thu thập trực tiếp</button>
+            <button class="tab" onclick="switchTab('tab-api')">Gọi API</button>
+            <button class="tab" onclick="switchTab('tab-compare')">So sánh kết quả</button>
+            <button class="tab" onclick="switchTab('tab-fingerprint')">Fingerprint</button>
+        </div>
+        
+        <div id="tab-direct" class="tab-content active">
+            <h2>Thu thập thông tin trực tiếp</h2>
+            <p>Thu thập thông tin trực tiếp từ trình duyệt của bạn.</p>
+            <button onclick="collectDirectInfo()">Thu thập thông tin</button>
+            <div id="direct-info" class="info-display">Thông tin sẽ hiển thị ở đây...</div>
+        </div>
+        
+        <div id="tab-api" class="tab-content">
+            <h2>Gọi API</h2>
+            <p>Gửi thông tin thu thập được đến API và nhận kết quả.</p>
+            <div class="info-item">
+                <span class="info-label">URL API:</span>
+                <input type="text" id="api-url" value="http://localhost:3000" style="width: 300px; padding: 8px;">
+            </div>
+            <button onclick="callAPI()">Gọi API</button>
+            <div id="api-info" class="info-display">Kết quả API sẽ hiển thị ở đây...</div>
+        </div>
+        
+        <div id="tab-compare" class="tab-content">
+            <h2>So sánh kết quả</h2>
+            <p>So sánh thông tin thu thập trực tiếp với thông tin từ API.</p>
+            <button onclick="compareResults()">So sánh kết quả</button>
+            <div id="compare-info" class="info-display">Kết quả so sánh sẽ hiển thị ở đây...</div>
+        </div>
+
+        <div id="tab-fingerprint" class="tab-content">
+            <h2>Thu thập Fingerprint</h2>
+            <p>Thu thập thông tin fingerprint chi tiết từ trình duyệt của bạn.</p>
+            <div class="info-item">
+                <span class="info-label">URL API:</span>
+                <input type="text" id="fingerprint-api-url" value="http://localhost:3000" style="width: 300px; padding: 8px;">
+            </div>
+            <button onclick="collectFingerprintData()">Thu thập Fingerprint</button>
+            <button onclick="sendFingerprintToAPI()" style="margin-left: 10px;">Gửi đến API</button>
+            <div id="fingerprint-info" class="info-display">Thông tin fingerprint sẽ hiển thị ở đây...</div>
+            <div id="fingerprint-api-response" class="info-display">Phản hồi từ API sẽ hiển thị ở đây...</div>
+        </div>
+    </div>
+
+    <script>
+        // Biến lưu trữ thông tin thu thập được
+        let directInfo = null;
+        let apiInfo = null;
+
+        // Chuyển đổi giữa các tab
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
+        }
+
+        // Thu thập thông tin trực tiếp từ trình duyệt
+        function collectDirectInfo() {
+            try {
+                const info = {};
+                
+                // User Agent
+                info.userAgent = navigator.userAgent;
+                
+                // Screen Resolution
+                info.screenResolution = `${window.screen.width}x${window.screen.height}`;
+                
+                // Timezone
+                info.timezoneOffset = new Date().getTimezoneOffset();
+                info.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                
+                // Language
+                info.language = navigator.language;
+                info.languages = navigator.languages ? navigator.languages.join(', ') : navigator.language;
+                
+                // Canvas Fingerprinting
+                try {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = 200;
+                    canvas.height = 50;
+                    ctx.textBaseline = "top";
+                    ctx.font = "14px 'Arial'";
+                    ctx.fillStyle = "#f60";
+                    ctx.fillRect(125, 1, 62, 20);
+                    ctx.fillStyle = "#069";
+                    ctx.fillText("Hello, World!", 2, 15);
+                    // Lấy hash của canvas data để tránh chuỗi quá dài
+                    const canvasData = canvas.toDataURL();
+                    info.canvasFingerprint = simpleHash(canvasData);
+                } catch (e) {
+                    info.canvasFingerprint = "Không khả dụng: " + e.message;
+                }
+                
+                // WebGL
+                try {
+                    const canvas = document.createElement('canvas');
+                    const gl = canvas.getContext('webgl');
+                    if (gl) {
+                        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                        info.webGLVendor = debugInfo ? gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) : "Không khả dụng";
+                        info.webGLRenderer = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : "Không khả dụng";
+                    } else {
+                        info.webGLVendor = "WebGL không khả dụng";
+                        info.webGLRenderer = "WebGL không khả dụng";
+                    }
+                } catch (e) {
+                    info.webGLVendor = "Lỗi: " + e.message;
+                    info.webGLRenderer = "Lỗi: " + e.message;
+                }
+                
+                // Device Memory
+                info.deviceMemory = navigator.deviceMemory || "Không khả dụng";
+                
+                // Hardware Concurrency (CPU cores)
+                info.hardwareConcurrency = navigator.hardwareConcurrency || "Không khả dụng";
+                
+                // Platform
+                info.platform = navigator.platform;
+                
+                // Connection info
+                if (navigator.connection) {
+                    info.connection = {
+                        effectiveType: navigator.connection.effectiveType,
+                        downlink: navigator.connection.downlink,
+                        rtt: navigator.connection.rtt,
+                        saveData: navigator.connection.saveData
+                    };
+                } else {
+                    info.connection = "Không khả dụng";
+                }
+                
+                // Cookie enabled
+                info.cookieEnabled = navigator.cookieEnabled;
+                
+                // Do Not Track
+                info.doNotTrack = navigator.doNotTrack || "Không khả dụng";
+                
+                // Battery status
+                if (navigator.getBattery) {
+                    navigator.getBattery().then(battery => {
+                        info.battery = {
+                            charging: battery.charging,
+                            level: battery.level * 100 + "%",
+                            chargingTime: battery.chargingTime !== Infinity ? battery.chargingTime : "Không xác định",
+                            dischargingTime: battery.dischargingTime !== Infinity ? battery.dischargingTime : "Không xác định"
+                        };
+                        updateDirectInfo(info);
+                    }).catch(err => {
+                        info.battery = "Không khả dụng: " + err.message;
+                        updateDirectInfo(info);
+                    });
+                } else {
+                    info.battery = "API không khả dụng";
+                    updateDirectInfo(info);
+                }
+                
+                directInfo = info;
+                document.getElementById('direct-info').innerHTML = '<pre>' + JSON.stringify(info, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('direct-info').innerHTML = '<p>Lỗi: ' + error.message + '</p>';
+            }
+        }
+        
+        function updateDirectInfo(info) {
+            directInfo = info;
+            document.getElementById('direct-info').innerHTML = '<pre>' + JSON.stringify(info, null, 2) + '</pre>';
+        }
+        
+        // Hàm tạo hash đơn giản cho chuỗi dài
+        function simpleHash(str) {
+            let hash = 0;
+            if (str.length === 0) return hash;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32bit integer
+            }
+            return hash.toString(16); // Convert to hex string
+        }
+
+        // Gọi API
+        async function callAPI() {
+            try {
+                const apiUrl = document.getElementById('api-url').value;
+                document.getElementById('api-info').innerHTML = 'Đang gọi API...';
+                
+                // Thu thập thông tin trực tiếp nếu chưa có
+                if (!directInfo) {
+                    collectDirectInfo();
+                }
+                
+                // Gọi API để lấy thông tin
+                const response = await fetch(`${apiUrl}`);
+                if (!response.ok) {
+                    throw new Error(`Lỗi HTTP: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                apiInfo = data;
+                
+                document.getElementById('api-info').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                
+                // Gửi thông tin client lên server
+                sendClientInfoToServer(apiUrl, directInfo);
+            } catch (error) {
+                document.getElementById('api-info').innerHTML = '<p>Lỗi khi gọi API: ' + error.message + '</p>';
+            }
+        }
+        
+        // Gửi thông tin client lên server
+        async function sendClientInfoToServer(apiUrl, clientInfo) {
+            try {
+                const response = await fetch(`${apiUrl}/submit-info`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(clientInfo)
+                });
+                
+                if (!response.ok) {
+                    console.error('Lỗi khi gửi thông tin lên server:', response.status);
+                    return;
+                }
+                
+                const result = await response.json();
+                console.log('Kết quả gửi thông tin:', result);
+            } catch (error) {
+                console.error('Lỗi khi gửi thông tin lên server:', error);
+            }
+        }
+        
+        // So sánh kết quả
+        function compareResults() {
+            if (!directInfo || !apiInfo) {
+                document.getElementById('compare-info').innerHTML = '<p>Vui lòng thu thập thông tin trực tiếp và gọi API trước khi so sánh.</p>';
+                return;
+            }
+            
+            const comparison = {
+                clientOnly: {},
+                serverOnly: {},
+                different: {},
+                same: {}
+            };
+            
+            // So sánh thông tin từ client với API
+            const apiData = apiInfo.data || apiInfo;
+            
+            // Kiểm tra các trường chỉ có ở client
+            for (const key in directInfo) {
+                if (apiData[key] === undefined) {
+                    comparison.clientOnly[key] = directInfo[key];
+                } else if (JSON.stringify(directInfo[key]) !== JSON.stringify(apiData[key])) {
+                    comparison.different[key] = {
+                        client: directInfo[key],
+                        server: apiData[key]
+                    };
+                } else {
+                    comparison.same[key] = directInfo[key];
+                }
+            }
+            
+            // Kiểm tra các trường chỉ có ở server
+            for (const key in apiData) {
+                if (directInfo[key] === undefined) {
+                    comparison.serverOnly[key] = apiData[key];
+                }
+            }
+            
+            document.getElementById('compare-info').innerHTML = '<pre>' + JSON.stringify(comparison, null, 2) + '</pre>';
+        }
+
+        // Biến lưu trữ fingerprint
+        let fingerprintData = null;
+        
+        // Thu thập dữ liệu fingerprint
+        async function collectFingerprintData() {
+            try {
+                document.getElementById('fingerprint-info').innerHTML = 'Đang thu thập fingerprint...';
+                
+                // Dynamically import the BrowserFingerprint module
+                const { BrowserFingerprint } = await import('./BrowserFingerprint.js');
+                
+                const fingerprinter = new BrowserFingerprint();
+                fingerprintData = await fingerprinter.collectAll();
+                
+                document.getElementById('fingerprint-info').innerHTML = '<pre>' + JSON.stringify(fingerprintData, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('fingerprint-info').innerHTML = '<p>Lỗi khi thu thập fingerprint: ' + error.message + '</p>';
+                console.error('Error collecting fingerprint:', error);
+            }
+        }
+        
+        // Gửi fingerprint đến API
+        async function sendFingerprintToAPI() {
+            try {
+                if (!fingerprintData) {
+                    document.getElementById('fingerprint-api-response').innerHTML = '<p>Vui lòng thu thập fingerprint trước khi gửi đến API.</p>';
+                    return;
+                }
+                
+                const apiUrl = document.getElementById('fingerprint-api-url').value;
+                document.getElementById('fingerprint-api-response').innerHTML = 'Đang gửi fingerprint đến API...';
+                
+                const response = await fetch(`${apiUrl}/submit-fingerprint`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(fingerprintData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Lỗi HTTP: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                document.getElementById('fingerprint-api-response').innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('fingerprint-api-response').innerHTML = '<p>Lỗi khi gửi fingerprint: ' + error.message + '</p>';
+                console.error('Error sending fingerprint to API:', error);
+            }
+        }
+    </script>
+    
+    <!-- Add module support for modern browsers -->
+    <script type="module">
+        import { BrowserFingerprint } from './BrowserFingerprint.js';
+        window.BrowserFingerprint = BrowserFingerprint;
+    </script>
+</body>
+</html>

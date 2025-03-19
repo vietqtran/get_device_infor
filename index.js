@@ -154,40 +154,40 @@ app.post('/submit-info', (req, res) => {
 
 // API nhận dữ liệu fingerprint từ client
 app.post('/submit-fingerprint', (req, res) => {
-   console.log('Đã nhận fingerprint từ client');
-   
+   console.log('Đã nhận fingerprint từ client')
+
    try {
-      const fingerprint = req.body;
-      
+      const fingerprint = req.body
+
       // Có thể lưu fingerprint vào database hoặc xử lý tiếp
       // Ở đây chỉ gửi lại phản hồi đơn giản
-      
+
       res.json({
          status: 'success',
          message: 'Đã nhận fingerprint thành công',
          fingerprintId: fingerprint.fingerprintId || 'Không có ID',
          timestamp: new Date().toISOString()
-      });
+      })
    } catch (error) {
       res.status(500).json({
          status: 'error',
          message: 'Lỗi khi xử lý fingerprint',
          error: error.message
-      });
+      })
    }
-});
+})
 
 // Phục vụ tệp BrowserFingerprint.js dưới dạng module ES6
 app.get('/BrowserFingerprint.js', (req, res) => {
-   res.setHeader('Content-Type', 'application/javascript');
-   res.sendFile(__dirname + '/BrowserFingerprint.js');
-});
+   res.setHeader('Content-Type', 'application/javascript')
+   res.sendFile(__dirname + '/BrowserFingerprint.js')
+})
 
 // Phục vụ tệp fingerprint-client.js
 app.get('/fingerprint-client.js', (req, res) => {
-   res.setHeader('Content-Type', 'application/javascript');
-   res.sendFile(__dirname + '/fingerprint-client.js');
-});
+   res.setHeader('Content-Type', 'application/javascript')
+   res.sendFile(__dirname + '/fingerprint-client.js')
+})
 
 // Trang HTML demo
 app.get('/demo', (req, res) => {
